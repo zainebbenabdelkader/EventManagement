@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Organizer - Eventify</title>
+    <link rel="stylesheet" href="css/orat.css">
+ 
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            background-color: #523754;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: white;
+        }
+        .logo-img {
+            height: 40px;
+            margin-right: 10px;
+        }
+        .content {
+            padding: 2rem;
+        }
+
+        /* Event List Styling */
+        .event-item {
+            background: #FFFFFF;
+            color: #523754;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease-in-out;
+            position: relative;
+        }
+        .event-item:hover {
+            transform: scale(1.02);
+        }
+        .event-item h3,
+        .event-item p {
+            margin: 0.5rem 0;
+        }
+        .event-item .action-btn {
+            margin-top: 10px;
+            padding: 0.5rem 1rem;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .modify-btn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .delete-btn {
+            background-color: #f44336;
+            color: white;
+        }
+        .action-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* Edit Form Styling */
+        .edit-form {
+            display: none;
+            background: #f4f4f4;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .edit-form input, .edit-form select {
+            margin-bottom: 1rem;
+            width: 100%;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid #ccc;
+        }
+        .edit-form button {
+            padding: 0.5rem 1rem;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+        }
+        .edit-form button:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+<header class="header">
+    <a href="#" class="logo">
+        <img src="images/eventify.png" alt="Eventify Logo" class="logo-img">
+        <span class="logo-text">Eventify</span>
+    </a>
+</header>
+
+<section class="organizer">
+    <div class="content">
+        <h3>Organizer Dashboard</h3>
+        <!-- Add Event Form -->
+        <form id="add-event-form">
+            <label for="event-name">Event Name:</label>
+            <input type="text" id="event-name" required>
+            <label for="event-type">Event Type:</label>
+            <select id="event-type" required>
+                <option value="conference">Conference</option>
+                <option value="concert">Concert</option>
+                <option value="webinar">Webinar</option>
+            </select>
+            <label for="event-date">Event Date:</label>
+            <input type="date" id="event-date" required>
+            <label for="price">Price:</label>
+            <input type="number" id="price" required>
+            <button type="submit">Add Event</button>
+        </form>
+
+        <!-- List of Events -->
+        <h4>List of Events:</h4>
+        <div id="event-list"></div>
+
+        <!-- Edit Event Form -->
+        <div class="edit-form" id="edit-form">
+            <h4>Edit Event</h4>
+            <form id="edit-event-form">
+                <label for="edit-event-name">Event Name:</label>
+                <input type="text" id="edit-event-name" required>
+                <label for="edit-event-type">Event Type:</label>
+                <select id="edit-event-type" required>
+                    <option value="conference">Conference</option>
+                    <option value="concert">Concert</option>
+                    <option value="webinar">Webinar</option>
+                </select>
+                <label for="edit-event-date">Event Date:</label>
+                <input type="date" id="edit-event-date" required>
+                <label for="edit-price">Price:</label>
+                <input type="number" id="edit-price" required>
+                <button type="submit">Save Changes</button>
+                <button type="button" id="cancel-edit">Cancel</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<script>
+    // Add Event Functionality
+    document.getElementById('add-event-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        // Get input values
+        const eventName = document.getElementById('event-name').value.trim();
+        const eventType = document.getElementById('event-type').value;
+        const eventDate = document.getElementById('event-date').value;
+        const eventPrice = document.getElementById('price').value.trim();
+
+        // Validate input
+        if (!eventName || !eventType || !eventDate || !eventPrice) {
+            alert("All fields are required!");
+            return;
+        }
+
+        // Create new event item
+        const eventItem = document.createElement('div');
+        eventItem.classList.add('event-item');
+        eventItem.innerHTML = `
+            <h3 class="event-name" contenteditable="false">${eventName}</h3>
+            <p class="event-type" contenteditable="false">Type: ${eventType}</p>
+            <p class="event-date" contenteditable="false">Date: ${eventDate}</p>
+            <p class="event-price" contenteditable="false">Price: $${eventPrice}</p>
+            <button class="modify-btn action-btn">Modify</button>
+            <button class="delete-btn action-btn">Delete</button>
+        `;
+
+        // Append to event list
+        document.getElementById('event-list').appendChild(eventItem);
+
+        // Clear the form
+        document.getElementById('add-event-form').reset();
+    });
+
+    // Handle Modify and Delete Actions
+    document.getElementById('event-list').addEventListener('click', function (e) {
+        const eventItem = e.target.closest('.event-item');
+
+        if (e.target.classList.contains('delete-btn')) {
+            // Delete the event
+            eventItem.remove();
+        } else if (e.target.classList.contains('modify-btn')) {
+            // Open the edit form and fill in current event details
+            openEditForm(eventItem);
+        }
+    });
+
+    // Open the edit form and pre-fill event data
+    function openEditForm(eventItem) {
+        const eventName = eventItem.querySelector('.event-name').textContent;
+        const eventType = eventItem.querySelector('.event-type').textContent.replace("Type: ", "");
+        const eventDate = eventItem.querySelector('.event-date').textContent.replace("Date: ", "");
+        const eventPrice = eventItem.querySelector('.event-price').textContent.replace("Price: $", "");
+
+        // Fill the edit form with current event details
+        document.getElementById('edit-event-name').value = eventName;
+        document.getElementById('edit-event-type').value = eventType;
+        document.getElementById('edit-event-date').value = eventDate;
+        document.getElementById('edit-price').value = eventPrice;
+
+        // Show the edit form
+        document.getElementById('edit-form').style.display = 'block';
+
+        // Handle saving changes
+        document.getElementById('edit-event-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            // Update the event item with new details
+            eventItem.querySelector('.event-name').textContent = document.getElementById('edit-event-name').value;
+            eventItem.querySelector('.event-type').textContent = `Type: ${document.getElementById('edit-event-type').value}`;
+            eventItem.querySelector('.event-date').textContent = `Date: ${document.getElementById('edit-event-date').value}`;
+            eventItem.querySelector('.event-price').textContent = `Price: $${document.getElementById('edit-price').value}`;
+
+            // Hide the edit form after saving
+            document.getElementById('edit-form').style.display = 'none';
+        });
+    }
+
+    // Cancel editing
+    document.getElementById('cancel-edit').addEventListener('click', function () {
+        document.getElementById('edit-form').style.display = 'none';
+    });
+</script>
+
+</body>
+</html>

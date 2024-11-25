@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Attender - Eventify</title>
+    <link rel="stylesheet" href="css/orat.css">
+ 
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        /* Universal Button Styling for All Buttons in the Browser */
+button {
+    padding: 1rem;
+    font-size: 1.8rem;
+    border-radius: .5rem;
+    background: var(--main-color); /* Main color defined by the CSS variable */
+    color: #FFFFFF;
+    cursor: pointer;
+    border: none;
+    font-weight: 600;
+    transition: background-color 0.3s ease;
+}
+
+/* Hover Effect for All Buttons */
+button:hover {
+    background: #773F7C; /* Darker color on hover */
+}
+
+/* Optional: Apply the same style to <a> tags styled as buttons */
+a.button {
+    padding: 1rem;
+    font-size: 1.8rem;
+    border-radius: .5rem;
+    background: var(--main-color);
+    color: #FFFFFF;
+    cursor: pointer;
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-block; /* Makes <a> tag behave like a block-level element */
+    transition: background-color 0.3s ease;
+}
+
+/* Hover Effect for <a> tags styled as buttons */
+a.button:hover {
+    background: #773F7C;
+}
+
+/* Optional: Modify link style inside .login (for your specific use case) */
+.login p a {
+    color: var(--main-color);
+    font-weight: 600;
+}
+
+.login p a:hover {
+    color: #523754;
+}
+
+        .header {
+            background-color: #523754;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            align-items: center;
+        }
+        .logo {
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            color: white;
+        }
+        .logo-img {
+            height: 40px;
+            margin-right: 10px;
+        }
+        .content {
+            padding: 2rem;
+        }
+
+        /* Event List Styling */
+        .event-item {
+            background: #FFFFFF;
+            color: #523754;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease-in-out;
+            position: relative;
+            cursor: pointer;
+        }
+        .event-item:hover {
+            transform: scale(1.02);
+        }
+        .event-item h3,
+        .event-item p {
+            margin: 0.5rem 0;
+        }
+        .event-item .attend-btn {
+            margin-top: 10px;
+            padding: 0.5rem 1rem;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+        }
+        .attend-btn:hover {
+            opacity: 0.9;
+        }
+
+        /* Event Details Styling */
+        .event-details {
+            display: none;
+            background: #f4f4f4;
+            padding: 1.5rem;
+            margin-top: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Payment Form Styling */
+        .payment-form {
+            display: none;
+            margin-top: 2rem;
+            background: #fff;
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .payment-form input {
+            margin-bottom: 1rem;
+            width: 100%;
+            padding: 0.5rem;
+            border-radius: 0.5rem;
+            border: 1px solid #ccc;
+        }
+        .payment-form button {
+            padding: 0.5rem 1rem;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            background-color: #4CAF50;
+            color: white;
+        }
+        .payment-form button:hover {
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+
+<header class="header">
+    <a href="#" class="logo">
+        <img src="images/eventify.png" alt="Eventify Logo" class="logo-img">
+        <span class="logo-text">Eventify</span>
+    </a>
+</header>
+
+<section class="attender">
+    <div class="content">
+        <h3>Browse Events</h3>
+        <button id="list-events-btn">List Events</button>
+
+        <!-- Event List -->
+        <div id="event-list"></div>
+
+        <!-- Event Details Section -->
+        <div class="event-details" id="event-details">
+            <h4 id="event-title"></h4>
+            <p><strong>Type:</strong> <span id="event-type"></span></p>
+            <p><strong>Date:</strong> <span id="event-date"></span></p>
+            <p><strong>Price:</strong> $<span id="event-price"></span></p>
+            <button id="attend-button" class="attend-btn">Attend</button>
+        </div>
+
+        <!-- Payment Form Section -->
+        <div class="payment-form" id="payment-form">
+            <h4>Payment Information</h4>
+            <form id="payment-form-input">
+                <label for="card-number">Card Number:</label>
+                <input type="text" id="card-number" required>
+                <label for="expiry-date">Expiry Date:</label>
+                <input type="text" id="expiry-date" required>
+                <label for="cvv">CVV:</label>
+                <input type="text" id="cvv" required>
+                <button type="submit">Pay Now</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<script>
+    // Sample events data
+    // Function to fetch and display events from the server
+document.getElementById('list-events-btn').addEventListener('click', function () {
+    fetch('lister.php') // Adjust the path if necessary
+        .then(response => response.json()) // Parse JSON response
+        .then(events => {
+            const eventListContainer = document.getElementById('event-list');
+            eventListContainer.innerHTML = ''; // Clear existing list
+
+            events.forEach(event => {
+                const eventItem = document.createElement('div');
+                eventItem.classList.add('event-item');
+                eventItem.innerHTML = `
+                    <h3>${event.event_name}</h3>
+                    <p>Type: ${event.event_type}</p>
+                    <p>Date: ${event.event_date}</p>
+                    <p><strong>Price:</strong> $${event.price}</p>
+                    <button class="attend-btn" onclick="showEventDetails(${event.id})">View Details & Attend</button>
+                `;
+                eventListContainer.appendChild(eventItem);
+            });
+        })
+        .catch(error => console.error('Error fetching events:', error));
+});
+
+    // Function to show event details when a user clicks "View Details & Attend"
+function showEventDetails(eventId) {
+    fetch('event-details.php?id=' + eventId) // You can create an event-details.php for individual event data if necessary
+        .then(response => response.json())
+        .then(event => {
+            // Fill the event details
+            document.getElementById('event-title').textContent = event.event_name;
+            document.getElementById('event-type').textContent = event.event_type;
+            document.getElementById('event-date').textContent = event.event_date;
+            document.getElementById('event-price').textContent = event.price;
+
+            // Show event details section
+            document.getElementById('event-details').style.display = 'block';
+        })
+        .catch(error => console.error('Error fetching event details:', error));
+}
+
+
+    // Function to handle payment form submission
+    document.getElementById('payment-form-input').addEventListener('submit', function (e) {
+        e.preventDefault();
+
+        // Here we can add the logic for processing payment
+        alert('Payment successful! Thank you for attending.');
+        
+        // Hide the payment form after submission
+        document.getElementById('payment-form').style.display = 'none';
+    });
+
+    // Display events when the page loads
+    window.onload = displayEvents;
+
+</script>
+
+</body>
+</html>
